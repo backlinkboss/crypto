@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; }
+    .container { margin: 12px; }
+    .metrics { display: flex; flex-wrap: wrap; gap: 12px; }
+    .metric { background: #23272f; border-radius: 8px; padding: 16px 18px; min-width: 170px; margin-bottom: 6px; color: #eee; }
+    .label { font-weight: bold; }
+    .capchange { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 12px; font-size: 0.96em; }
+    .capchange.positive { background: #223c1d; color: #7cff77; }
+    .capchange.negative { background: #442222; color: #ff6666; }
+    .section { margin-bottom: 18px; }
+    .section h2 { font-size: 1.1em; color: #f7931a; margin: 0 0 8px 0; }
+    .controls { margin-bottom: 12px; }
+    .updated { color: #f7931a; margin-bottom: 10px; }
+    /* Responsive */
+    @media (max-width: 800px) {
+      .metrics { flex-direction: column; gap: 8px; }
+      .metric { min-width: unset; width: 100%; }
+      .container { margin: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <button id="toggle-theme" style="position:absolute; right:24px; top:24px; z-index:100;">🌙/☀️</button>
+  <div class="container">
+    <h1>Dashboard</h1>
+	<div class="coin-tabs">
+  <button class="tab-btn active" data-coin="all">Tất cả</button>
+  <button class="tab-btn" data-coin="btc">BTC</button>
+  <button class="tab-btn" data-coin="eth">ETH</button>
+  <button class="tab-btn" data-coin="alt">Altcoin</button>
+  <button class="tab-btn" data-coin="meme">Meme</button>
+  <button class="tab-btn" data-coin="defi">DeFi</button>
+  <!-- Có thể thêm nhiều tab khác nếu cần -->
+</div>
+    <div class="updated" id="updated">Đang tải...
+      <span id="loading-spinner" style="display:none; font-size:20px; margin-left:8px;">⏳</span>
+    </div>
+    
+    <!-- Tổng quan -->
+    <div class="section">
+      <h2>Tổng quan</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="label" title="Tổng vốn hóa toàn thị trường">🌐 Tổng Market Cap</div>
+          <div class="value">
+            <span id="total">...</span>
+            <span id="cap_change" class="capchange">...</span>
+          </div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Vốn hóa Bitcoin">🟧 BTC Market Cap</div>
+          <div class="value" id="btc">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Vốn hóa Ethereum">🟦 ETH Market Cap</div>
+          <div class="value" id="eth">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Vốn hóa Altcoin (toàn bộ altcoin)">🟩 Altcoin Market Cap</div>
+          <div class="value" id="alt">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Tỉ lệ vốn hóa Bitcoin">🥇 BTC Dominance</div>
+          <div class="value" id="btc_dom">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Tỉ lệ vốn hóa Ethereum">🥈 ETH Dominance</div>
+          <div class="value" id="eth_dom">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông tin chi tiết -->
+    <div class="section">
+      <h2>Thông tin chi tiết</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="label" title="Giá Bitcoin hiện tại">🪙 BTC Giá</div>
+          <div class="value" id="btc_price">...</div>
+          <div class="sub">Volume 24h: <span id="btc_vol">...</span></div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Giá Ethereum hiện tại">🪙 ETH Giá</div>
+          <div class="value" id="eth_price">...</div>
+          <div class="sub">Volume 24h: <span id="eth_vol">...</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Phái sinh & Whale/Liquidation -->
+    <div class="section">
+      <h2>Phái sinh</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="label" title="Funding Rate Bitcoin Futures">⚡ Funding Rate BTC</div>
+          <div class="value" id="funding_btc">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Funding Rate Ethereum Futures">⚡ Funding Rate ETH</div>
+          <div class="value" id="funding_eth">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Open Interest Bitcoin Futures">📊 OI BTC</div>
+          <div class="value" id="oi_btc">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Open Interest Ethereum Futures">📊 OI ETH</div>
+          <div class="value" id="oi_eth">...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Whale & Liquidation Alert</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="label" title="Dòng tiền cá mập BTC">🐋 Whale Alert (BTC)</div>
+          <div class="value" id="whale_btc">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Dòng tiền cá mập ETH">🐋 Whale Alert (ETH)</div>
+          <div class="value" id="whale_eth">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Thanh lý hợp đồng Bitcoin">💥 Liquidation (BTC)</div>
+          <div class="value" id="liq_btc">...</div>
+        </div>
+        <div class="metric">
+          <div class="label" title="Thanh lý hợp đồng Ethereum">💥 Liquidation (ETH)</div>
+          <div class="value" id="liq_eth">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <label for="interval">Tự động làm mới:</label>
+      <select id="interval">
+        <option value="0">Tắt</option>
+        <option value="10">10 giây</option>
+        <option value="30">30 giây</option>
+        <option value="60">1 phút</option>
+        <option value="300">5 phút</option>
+      </select>
+      <button id="refresh-btn">Làm mới</button>
+    </div>
+
+    <footer>
+      <small>Powered by BOSS</small>
+    </footer>
+  </div>
+  
+  <audio id="audio-alert" src="alert.mp3"></audio>
+  <script src="renderer.js"></script>
+</body>
+</html>
